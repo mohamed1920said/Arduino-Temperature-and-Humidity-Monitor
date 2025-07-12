@@ -1,0 +1,69 @@
+#include <DHT.h>
+#include <LiquidCrystal.h>
+
+// Définir les broches
+#define DHTPIN 7     // Broche DATA du DHT11
+#define DHTTYPE DHT11
+
+// Initialiser le capteur DHT
+DHT dht(DHTPIN, DHTTYPE);
+
+// Initialiser l'écran LCD avec les broches utilisées
+const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+void setup() {
+  // Initialiser la communication série
+  Serial.begin(9600);
+  
+  // Démarrer le capteur DHT
+  dht.begin();
+  
+  // Configurer l'écran LCD
+  lcd.begin(16, 2);
+  
+  // Afficher le message initial
+  lcd.print("Initialisation...");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  // Attendre 2 secondes entre les mesures
+  delay(1000);
+  
+  // Lire l'humidité
+  float h = dht.readHumidity();
+  // Lire la température en Celsius
+  float t = dht.readTemperature();
+  
+  // Vérifier si la lecture a échoué
+  if (isnan(h) || isnan(t)) {
+    lcd.clear();
+    lcd.print("Erreur lecture!");
+    return;
+  }
+
+  // Afficher les données sur l'écran LCD
+  lcd.clear();
+  
+  // Première ligne (Température)
+  lcd.setCursor(0, 0);
+  lcd.print("T: ");
+  lcd.print(t);
+  lcd.print((char)223); // Symbole degré
+  lcd.print("C");
+  
+  // Deuxième ligne (Humidité)
+  lcd.setCursor(0, 1);
+  lcd.print("H: ");
+  lcd.print(h);
+  lcd.print("%");
+
+  // Afficher aussi sur le moniteur série
+  Serial.print("Humidite: ");
+  Serial.print(h);
+  Serial.print("%  Temperature: ");
+  Serial.print(t);
+  Serial.println("°C");
+}
